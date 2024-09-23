@@ -4,9 +4,11 @@
 This helm chart includes subcharts for Meilisearch, Postgres, and RabbitMQ.  Those resources should be managed outside of this Helm release.
 
 # Example Deployment
+
 ```sh
 helm upgrade kyoo . --install --values myvalues.yaml
 ```
+
 `myvaules.yaml` content
 ```yaml
 kyoo:
