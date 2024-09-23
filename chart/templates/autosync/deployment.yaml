@@ -48,19 +48,15 @@ spec:
             {{- end }}
           env:
             - name: RABBITMQ_HOST
-              value: {{ .Values.global.rabbitmq.host }}
+              value: "{{ .Values.global.rabbitmq.host }}"
             - name: RABBITMQ_PORT
               value: "{{ .Values.global.rabbitmq.port }}"
             - name: RABBITMQ_DEFAULT_USER
               valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.global.rabbitmq.kyoo_autosync.userKey }}
-                  name: {{ .Values.global.rabbitmq.kyoo_autosync.existingSecret }}
+                secretKeyRef: {{ toYaml .Values.global.rabbitmq.kyoo_autosync.usernameSecretRef | nindent 18 }}
             - name: RABBITMQ_DEFAULT_PASS
               valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.global.rabbitmq.kyoo_autosync.passwordKey }}
-                  name: {{ .Values.global.rabbitmq.kyoo_autosync.existingSecret }}
+                secretKeyRef: {{ toYaml .Values.global.rabbitmq.kyoo_autosync.passwordSecretRef | nindent 18 }}
             {{- with (concat .Values.global.extraEnv .Values.autosync.kyoo_autosync.extraEnv) }}
               {{- toYaml . | nindent 12 }}
             {{- end }}

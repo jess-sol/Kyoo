@@ -49,18 +49,14 @@ spec:
           env:
             - name: POSTGRES_USER
               valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.global.postgres.kyoo_back.kyoo_migrations.userKey }}
-                  name: {{ .Values.global.postgres.kyoo_back.kyoo_migrations.existingSecret }}
+                secretKeyRef: {{ toYaml .Values.global.postgres.kyoo_back.kyoo_migrations.usernameSecretRef | nindent 18 }}
             - name: POSTGRES_PASSWORD
               valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.global.postgres.kyoo_back.kyoo_migrations.passwordKey }}
-                  name: {{ .Values.global.postgres.kyoo_back.kyoo_migrations.existingSecret }}
+                secretKeyRef: {{ toYaml .Values.global.postgres.kyoo_back.kyoo_migrations.passwordSecretRef | nindent 18 }}
             - name: POSTGRES_DB
-              value: {{ .Values.global.postgres.kyoo_back.database }}
+              value: "{{ .Values.global.postgres.kyoo_back.database }}"
             - name: POSTGRES_SERVER
-              value: {{ .Values.global.postgres.kyoo_back.host }}
+              value: "{{ .Values.global.postgres.kyoo_back.host }}"
             - name: POSTGRES_PORT
               value: "{{ .Values.global.postgres.kyoo_back.port }}"
         {{- with .Values.back.extraInitContainers }}
@@ -76,15 +72,15 @@ spec:
             {{- end }}
           env:
             - name: TRANSCODER_URL
-              value: http://{{ include "kyoo.transcoder.fullname" . }}:7666
+              value: "http://{{ include "kyoo.transcoder.fullname" . }}:7666"
             - name: PUBLIC_URL
-              value: {{ .Values.kyoo.address }}
+              value: "{{ .Values.kyoo.address }}"
             - name: REQUIRE_ACCOUNT_VERIFICATION
-              value: {{ .Values.kyoo.requireAccountVerification }}
+              value: "{{ .Values.kyoo.requireAccountVerification }}"
             - name: DEFAULT_PERMISSIONS
-              value: {{ .Values.kyoo.defaultPermissions }}
+              value: "{{ .Values.kyoo.defaultPermissions }}"
             - name: UNLOGGED_PERMISSIONS
-              value: {{ .Values.kyoo.unloggedPermissions }}
+              value: "{{ .Values.kyoo.unloggedPermissions }}"
             - name: KYOO_APIKEYS
               valueFrom:
                 secretKeyRef:
@@ -92,32 +88,24 @@ spec:
                   name: {{ .Values.kyoo.apikey.existingSecret }}
             - name: POSTGRES_USER
               valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.global.postgres.kyoo_back.kyoo_back.userKey }}
-                  name: {{ .Values.global.postgres.kyoo_back.kyoo_back.existingSecret }}
+                secretKeyRef: {{ toYaml .Values.global.postgres.kyoo_back.kyoo_back.usernameSecretRef | nindent 18 }}
             - name: POSTGRES_PASSWORD
               valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.global.postgres.kyoo_back.kyoo_back.passwordKey }}
-                  name: {{ .Values.global.postgres.kyoo_back.kyoo_back.existingSecret }}
+                secretKeyRef: {{ toYaml .Values.global.postgres.kyoo_back.kyoo_back.passwordSecretRef | nindent 18 }}
             - name: POSTGRES_DB
-              value: {{ .Values.global.postgres.kyoo_back.database }}
+              value: "{{ .Values.global.postgres.kyoo_back.database }}"
             - name: POSTGRES_SERVER
-              value: {{ .Values.global.postgres.kyoo_back.host }}
+              value: "{{ .Values.global.postgres.kyoo_back.host }}"
             - name: POSTGRES_PORT
               value: "{{ .Values.global.postgres.kyoo_back.port }}"
             - name: RABBITMQ_DEFAULT_USER
               valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.global.rabbitmq.kyoo_back.userKey }}
-                  name: {{ .Values.global.rabbitmq.kyoo_back.existingSecret }}
+                secretKeyRef: {{ toYaml .Values.global.rabbitmq.kyoo_back.usernameSecretRef | nindent 18 }}
             - name: RABBITMQ_DEFAULT_PASS
               valueFrom:
-                secretKeyRef:
-                  key: {{ .Values.global.rabbitmq.kyoo_back.passwordKey }}
-                  name: {{ .Values.global.rabbitmq.kyoo_back.existingSecret }}
+                secretKeyRef: {{ toYaml .Values.global.rabbitmq.kyoo_back.passwordSecretRef | nindent 18 }}
             - name: RABBITMQ_HOST
-              value: {{ .Values.global.rabbitmq.host }}
+              value: "{{ .Values.global.rabbitmq.host }}"
             - name: RABBITMQ_PORT
               value: "{{ .Values.global.rabbitmq.port }}"
             - name: MEILI_HOST

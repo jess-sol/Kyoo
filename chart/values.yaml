@@ -21,34 +21,45 @@ global:
     kyoo_back:
       masterkeyKey: MEILI_MASTER_KEY
       existingSecret: bigsecret
+
   postgres:
-    #infra is only used by subchart deployment
+    # This is only used to configure the postgres subchart
     infra:
       # subchart does not accept this global value in one place
       # if updating be sure to also update postgresql.auth.username
       user: kyoo_all
-      passwordKey: postgres_password
-      existingSecret: bigsecret
+      passwordSecretRef:
+        name: bigsecret
+        key: postgres_password
     kyoo_back:
       host: kyoo-postgresql
       port: 5432
       database: kyoo_back
       kyoo_migrations:
-        userKey: postgres_user
-        passwordKey: postgres_password
-        existingSecret: bigsecret
+        usernameSecretRef:
+          name: bigsecret
+          key: postgres_user
+        passwordSecretRef:
+          name: bigsecret
+          key: postgres_password
       kyoo_back:
-        userKey: postgres_user
-        passwordKey: postgres_password
-        existingSecret: bigsecret
+        usernameSecretRef:
+          name: bigsecret
+          key: postgres_user
+        passwordSecretRef:
+          name: bigsecret
+          key: postgres_password
     kyoo_transcoder:
       host: kyoo-postgresql
       port: 5432
       database: kyoo_transcoder
       kyoo_transcoder:
-        userKey: postgres_user
-        passwordKey: postgres_password
-        existingSecret: bigsecret
+        usernameSecretRef:
+          name: bigsecret
+          key: postgres_user
+        passwordSecretRef:
+          name: bigsecret
+          key: postgres_password
   rabbitmq:
     host: kyoo-rabbitmq
     port: 5672
@@ -56,26 +67,41 @@ global:
     # vhost: ""
     #infra is only used by subchart deployment
     infra:
-      # user must be manually aligned via rabbitmq.auth.user
-      passwordKey: rabbitmq_password
-      keyErlangCookie: rabbitmq_cookie
-      existingSecret: bigsecret
+      # user must be manually aligned via rabbitmq.auth.user # TODO?
+      erlangCookieSecretRef:
+        name: bigsecret
+        key: rabbitmq_cookie
+      passwordSecretRef:
+        name: bigsecret
+        key: rabbitmq_password
     kyoo_autosync:
-      userKey: rabbitmq_user
-      passwordKey: rabbitmq_password
-      existingSecret: bigsecret
+      usernameSecretRef:
+        name: bigsecret
+        key: rabbitmq_user
+      passwordSecretRef:
+        name: bigsecret
+        key: rabbitmq_password
     kyoo_back:
-      userKey: rabbitmq_user
-      passwordKey: rabbitmq_password
-      existingSecret: bigsecret
+      usernameSecretRef:
+        name: bigsecret
+        key: rabbitmq_user
+      passwordSecretRef:
+        name: bigsecret
+        key: rabbitmq_password
     kyoo_matcher:
-      userKey: rabbitmq_user
-      passwordKey: rabbitmq_password
-      existingSecret: bigsecret
+      usernameSecretRef:
+        name: bigsecret
+        key: rabbitmq_user
+      passwordSecretRef:
+        name: bigsecret
+        key: rabbitmq_password
     kyoo_scanner:
-      userKey: rabbitmq_user
-      passwordKey: rabbitmq_password
-      existingSecret: bigsecret
+      usernameSecretRef:
+        name: bigsecret
+        key: rabbitmq_user
+      passwordSecretRef:
+        name: bigsecret
+        key: rabbitmq_password
 
 kyoo:
   address: "https://kyoo.mydomain.com"
@@ -240,7 +266,7 @@ matcher:
     containerSecurityContext: {}
     extraVolumeMounts: []
     # workaround until dedicated image is created
-    extraArgs: 
+    extraArgs:
       - matcher
     extraEnv: []
     image:
@@ -352,12 +378,12 @@ postgresql:
   enabled: false
   auth:
     # username is unable to reference global value
-    username: kyoo_all 
-    existingSecret: "{{ .Values.global.postgres.infra.existingSecret }}"
+    username: kyoo_all
+    existingSecret: "{{ .Values.global.postgres.infra.passwordSecretRef.name }}"
     secretKeys:
       # set the postgres user password to the same as our user
-      adminPasswordKey: "{{ .Values.global.postgres.infra.passwordKey }}"
-      userPasswordKey: "{{ .Values.global.postgres.infra.passwordKey }}"
+      adminPasswordKey: "{{ .Values.global.postgres.infra.passwordSecretRef.key }}"
+      userPasswordKey: "{{ .Values.global.postgres.infra.passwordSecretRef.key }}"
   primary:
     # create databases, schemas, and set search_path
     initdb:
@@ -365,7 +391,7 @@ postgresql:
         # kyoo_back still requires public schema
         # https://github.com/zoriya/Kyoo/issues/536
         kyoo_back.sql: |
-          CREATE DATABASE {{ .Values.global.postgres.kyoo_back.database }} WITH OWNER {{ .Values.global.postgres.infra.user }}; 
+          CREATE DATABASE {{ .Values.global.postgres.kyoo_back.database }} WITH OWNER {{ .Values.global.postgres.infra.user }};
           \connect {{ .Values.global.postgres.kyoo_back.database }};
           CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
         kyoo_transcoder.sql: |
@@ -374,9 +400,9 @@ postgresql:
           REVOKE ALL ON SCHEMA public FROM PUBLIC;
           CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION {{ .Values.global.postgres.infra.user }};
         user.sql: |
-          ALTER ROLE {{ .Values.global.postgres.infra.user }} 
+          ALTER ROLE {{ .Values.global.postgres.infra.user }}
           IN DATABASE {{ .Values.global.postgres.kyoo_back.database }} SET search_path TO "$user", public;
-          ALTER ROLE {{ .Values.global.postgres.infra.user }} 
+          ALTER ROLE {{ .Values.global.postgres.infra.user }}
           IN DATABASE {{ .Values.global.postgres.kyoo_transcoder.database }} SET search_path TO "$user", data;
     persistence:
       size: 3Gi
@@ -387,10 +413,10 @@ rabbitmq:
   auth:
     # this will not read from a secret. just manually make the same
     username: kyoo_all
-    existingPasswordSecret: "{{ .Values.global.rabbitmq.infra.existingSecret }}"
-    existingSecretPasswordKey: "{{ .Values.global.rabbitmq.infra.passwordKey }}"
-    existingErlangSecret: "{{ .Values.global.rabbitmq.infra.existingSecret }}"
-    existingSecretErlangKey: "{{ .Values.global.rabbitmq.infra.keyErlangCookie }}"
+    existingPasswordSecret: "{{ .Values.global.rabbitmq.infra.passwordSecretRef.name }}"
+    existingSecretPasswordKey: "{{ .Values.global.rabbitmq.infra.passwordSecretRef.key }}"
+    existingErlangSecret: "{{ .Values.global.rabbitmq.infra.erlangCookieSecretRef.name }}"
+    existingSecretErlangKey: "{{ .Values.global.rabbitmq.infra.erlangCookieSecretRef.key }}"
 
 # create extraObjects
 # create secret bigsecret
