@@ -410,6 +410,13 @@ postgresql:
 # subchart settings
 rabbitmq:
   enabled: false
+  resources:
+    requests:
+      cpu: 1
+      memory: 512Mi
+    limits:
+      cpu: 1
+      memory: 1024Mi
   auth:
     # this will not read from a secret. just manually make the same
     username: kyoo_all
